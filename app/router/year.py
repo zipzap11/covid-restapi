@@ -12,7 +12,7 @@ default_upto = int(DATA["update"]["harian"][-1]["key_as_string"][:4])
 
 
 @router.get("/yearly")
-async def yearly(since: int = default_since, upto: int = default_upto):
+async def yearly_controller(since: int = default_since, upto: int = default_upto):
     data = DATA["update"]["harian"]
     resp_list = []
 
@@ -35,3 +35,20 @@ async def yearly(since: int = default_since, upto: int = default_upto):
         resp_list.append(value)
 
     return resp_list
+
+
+@router.get("/yearly/{year}")
+async def specific_year_controller(year: str):
+    data = DATA["update"]["harian"]
+    resp_obj = YearResponse(year, 0, 0, 0, 0)
+
+    for val in data:
+        if not (year == val["key_as_string"][:4]):
+            continue
+
+        resp_obj.positive += int(val["jumlah_positif"]["value"])
+        resp_obj.deaths += int(val["jumlah_meninggal"]["value"])
+        resp_obj.recovered += int(val["jumlah_sembuh"]["value"])
+        resp_obj.active += int(val["jumlah_dirawat"]["value"])
+
+    return resp_obj
