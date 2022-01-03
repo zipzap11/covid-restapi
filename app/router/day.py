@@ -37,11 +37,28 @@ def new_day_resp(source: Dict):
     return DayResponse(date, positive, recovered, deaths, active)
 
 
+def validate_date(year: int, month: int, day: int, since: Dict, upto: Dict):
+    if year < since["year"] or year > upto["year"]:
+        return False
+    if (year == since["year"] and month < since["month"]) or (
+        year == upto["year"] and month > upto["month"]
+    ):
+        return False
+    if year == since["year"] and month == since["month"] and day < since["day"]:
+        return False
+    if year == upto["year"] and month == upto["month"] and day > upto["day"]:
+        return False
+
+    return True
+
+
 @router.get("/daily")
 def daily_controller(since: str = default_since, upto: str = default_upto):
-
     year_since, month_since, day_since = separate_date(since, ".")
     year_upto, month_upto, day_upto = separate_date(upto, ".")
+
+    since_dict = {"year": year_since, "month": month_since, "day": day_since}
+    upto_dict = {"year": year_upto, "month": month_upto, "day": day_upto}
 
     resp_list = []
     data = DATA["update"]["harian"]
@@ -50,16 +67,7 @@ def daily_controller(since: str = default_since, upto: str = default_upto):
         date = val["key_as_string"][:10]
         year, month, day = separate_date(date, "-")
 
-        # validate date
-        if year < year_since or year > year_upto:
-            continue
-        if (year == year_since and month < month_since) or (
-            year == year_upto and month > month_upto
-        ):
-            continue
-        if year == year_since and month == month_since and day < day_since:
-            continue
-        if year == year_upto and month == month_upto and day > day_upto:
+        if not validate_date(year, month, day, since_dict, upto_dict):
             continue
 
         daily_data = new_day_resp(val)
