@@ -53,7 +53,7 @@ def validate_date(year: int, month: int, day: int, since: Dict, upto: Dict):
 
 
 @router.get("/daily")
-def daily_controller(since: str = default_since, upto: str = default_upto):
+async def daily_controller(since: str = default_since, upto: str = default_upto):
     year_since, month_since, day_since = separate_date(since, ".")
     year_upto, month_upto, day_upto = separate_date(upto, ".")
 
@@ -77,7 +77,7 @@ def daily_controller(since: str = default_since, upto: str = default_upto):
 
 
 @router.get("/daily/{year}")
-def daily_year_controller(
+async def daily_year_controller(
     year: int, since: Optional[str] = None, upto: Optional[str] = None
 ):
     if not since:
@@ -96,9 +96,40 @@ def daily_year_controller(
 
     for val in data:
         date = val["key_as_string"][:10]
-        year, month, date = separate_date(date, "-")
+        year_date, month_date, day_date = separate_date(date, "-")
 
-        if not validate_date(year, month, date, since_dict, upto_dict):
+        if not validate_date(year_date, month_date, day_date, since_dict, upto_dict):
+            continue
+
+        daily_data = new_day_resp(val)
+        resp_list.append(daily_data)
+
+    return resp_list
+
+
+@router.get("/daily/{year}/{month}")
+async def daily_year_month_controller(
+    year: int, month: int, since: Optional[str] = None, upto: Optional[str] = None
+):
+    if not since:
+        since = str(year) + "." + str(month) + ".01"
+    if not upto:
+        upto = str(year) + "." + str(month) + ".31"
+
+    day_since = separate_date(since, ".")[2]
+    day_upto = separate_date(upto, ".")[2]
+
+    since_dict = {"year": year, "month": month, "day": day_since}
+    upto_dict = {"year": year, "month": month, "day": day_upto}
+
+    data = DATA["update"]["harian"]
+    resp_list = []
+
+    for val in data:
+        date = val["key_as_string"][:10]
+        year_date, month_date, day_date = separate_date(date, "-")
+
+        if not validate_date(year_date, month_date, day_date, since_dict, upto_dict):
             continue
 
         daily_data = new_day_resp(val)
