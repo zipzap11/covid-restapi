@@ -9,6 +9,7 @@ from app.helper.validate import (
     validate_same_year,
     validate_year,
 )
+from app.model.response import SuccessResponse
 
 from ..helper.helper import from_dictval_to_list
 from ..dependencies import DATA
@@ -75,7 +76,7 @@ def monthly_controller(since: str = default_since, upto: str = default_upto):
     list_resp = from_dictval_to_list(monthly_data)
     validate_empty_list(list_resp)
 
-    return list_resp
+    return SuccessResponse(list_resp)
 
 
 @router.get("/monthly/{year}")
@@ -122,7 +123,7 @@ def monthly_year_controller(
     list_resp = from_dictval_to_list(monthly_data)
     validate_empty_list(list_resp)
 
-    return list_resp
+    return SuccessResponse(list_resp)
 
 
 @router.get("/monthly/{year}/{month}")
@@ -140,7 +141,7 @@ def montly_year_month_controller(year: str, month: str):
         if moth != moth_resp:
             continue
 
-        return new_month_resp(val)
+        return SuccessResponse(new_month_resp(val))
 
     raise HTTPException(status_code=404, detail="not found")
 

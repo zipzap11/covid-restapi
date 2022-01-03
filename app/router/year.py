@@ -2,6 +2,7 @@ from typing import Dict
 from fastapi import APIRouter
 
 from app.helper.validate import validate_empty_list, validate_empty_obj, validate_year
+from app.model.response import SuccessResponse
 from ..dependencies import DATA
 from ..model.year import YearResponse
 
@@ -41,11 +42,11 @@ async def yearly_controller(since: str = default_since, upto: str = default_upto
 
     validate_empty_list(resp_list)
 
-    return resp_list
+    return SuccessResponse(resp_list)
 
 
 @router.get("/yearly/{year}")
-async def specific_year_controller(year: str):
+async def yearly_year_controller(year: str):
     validate_year(year)
 
     data = DATA["update"]["harian"]
@@ -69,4 +70,4 @@ async def specific_year_controller(year: str):
 
     resp_obj = YearResponse(year, positive, recovered, deaths, active)
 
-    return resp_obj
+    return SuccessResponse(resp_obj)
