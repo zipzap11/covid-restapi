@@ -1,6 +1,7 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
+from fastapi.params import Depends
 
 from app.helper.validate import (
     validate_date_query,
@@ -13,22 +14,22 @@ from app.helper.validate import (
     validate_year,
 )
 from app.model.response import SuccessResponse
-from ..dependencies import DATA
+from ..dependencies import DATA, fetch_data
 from ..model.date import DayResponse
 
 router = APIRouter()
 
 
 # get first date
-key = DATA["update"]["harian"][0]["key_as_string"]
+key = DATA[0]["key_as_string"]
 default_since = key[:4] + "." + key[5:7] + "." + key[8:10]
 # get last date
-key = DATA["update"]["harian"][-1]["key_as_string"]
+key = DATA[-1]["key_as_string"]
 default_upto = key[:4] + "." + key[5:7] + "." + key[8:10]
 
 
 @router.get("/daily")
-async def daily_controller(since: str = default_since, upto: str = default_upto):
+async def daily_controller(since: str = default_since, upto: str = default_upto, data: List = Depends(fetch_data)):
     validate_date_query(since)
     validate_date_query(upto)
 
@@ -39,7 +40,6 @@ async def daily_controller(since: str = default_since, upto: str = default_upto)
     upto_dict = {"year": year_upto, "month": month_upto, "day": day_upto}
 
     resp_list = []
-    data = DATA["update"]["harian"]
 
     for val in data:
         date = val["key_as_string"][:10]
@@ -58,7 +58,7 @@ async def daily_controller(since: str = default_since, upto: str = default_upto)
 
 @router.get("/daily/{year}")
 async def daily_year_controller(
-    year: str, since: Optional[str] = None, upto: Optional[str] = None
+    year: str, since: Optional[str] = None, upto: Optional[str] = None, data: List = Depends(fetch_data)
 ):
     validate_year(year)
 
@@ -78,7 +78,6 @@ async def daily_year_controller(
     since_dict = {"year": int(year), "month": month_since, "day": day_since}
     upto_dict = {"year": int(year), "month": month_upto, "day": day_upto}
 
-    data = DATA["update"]["harian"]
     resp_list = []
 
     for val in data:
@@ -100,7 +99,7 @@ async def daily_year_controller(
 
 @router.get("/daily/{year}/{month}")
 async def daily_year_month_controller(
-    year: str, month: str, since: Optional[str] = None, upto: Optional[str] = None
+    year: str, month: str, since: Optional[str] = None, upto: Optional[str] = None, data: List = Depends(fetch_data)
 ):
     validate_year(str(year))
     validate_month(str(month))
@@ -122,7 +121,6 @@ async def daily_year_month_controller(
     since_dict = {"year": int(year), "month": int(month), "day": day_since}
     upto_dict = {"year": int(year), "month": int(month), "day": day_upto}
 
-    data = DATA["update"]["harian"]
     resp_list = []
 
     for val in data:
@@ -143,13 +141,11 @@ async def daily_year_month_controller(
 
 
 @router.get("/daily/{year}/{month}/{day}")
-def daily_year_month_day_controller(year: str, month: str, day: str):
+async def daily_year_month_day_controller(year: str, month: str, day: str, data: List = Depends(fetch_data)):
     # parameter validation
     validate_year(year)
     validate_month(month)
     validate_day(day)
-
-    data = DATA["update"]["harian"]
 
     # handling zero as the first number
     if day[0] == "0":
