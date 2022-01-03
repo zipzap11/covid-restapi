@@ -1,4 +1,4 @@
-class YearResponse:
+class DayResponse:
     def __init__(
         self, date: str, positive: int, recovered: int, deaths: int, active: int
     ):
