@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from fastapi import APIRouter
 
 from ..helper.helper import from_dictval_to_list
@@ -43,6 +43,43 @@ def monthly_controller(since: str = default_since, upto: str = default_upto):
         monthly_data[moth].deaths += val["jumlah_meninggal"]["value"]
         monthly_data[moth].recovered += val["jumlah_sembuh"]["value"]
         monthly_data[moth].active += val["jumlah_dirawat"]["value"]
+
+    return from_dictval_to_list(monthly_data)
+
+
+@router.get("/monthly/{year}")
+def monthly_year_controller(
+    year: int, since: Optional[str] = None, upto: Optional[str] = None
+):
+    if not since:
+        since = str(year) + ".01"
+    if not upto:
+        upto = str(year) + ".12"
+
+    data = DATA["update"]["harian"]
+
+    monthly_data: Dict[int, MonthResponse] = {}
+    for val in data:
+        moth = val["key_as_string"][:7]
+
+        [data_year, data_month] = split_moth_code(moth, "-")
+
+        if year != data_year:
+            continue
+
+        month_since = split_moth_code(since, ".")[1]
+        month_upto = split_moth_code(upto, ".")[1]
+
+        if data_month < month_since or data_month > month_upto:
+            continue
+
+        if data_month not in monthly_data.values():
+            monthly_data[data_month] = MonthResponse(moth, 0, 0, 0, 0)
+
+        monthly_data[data_month].positive += val["jumlah_positif"]["value"]
+        monthly_data[data_month].deaths += val["jumlah_meninggal"]["value"]
+        monthly_data[data_month].recovered += val["jumlah_sembuh"]["value"]
+        monthly_data[data_month].active += val["jumlah_dirawat"]["value"]
 
     return from_dictval_to_list(monthly_data)
 
