@@ -3,7 +3,6 @@ from fastapi.exceptions import HTTPException
 
 
 def validate_year(year: str):
-    # print("year =", year)
     if not year.isdecimal():
         raise HTTPException(status_code=400, detail="invalid year")
 
@@ -29,7 +28,6 @@ def validate_month(month: str):
 
 
 def validate_day(day: str):
-    print("day =", day)
     if not day.isdecimal():
         raise HTTPException(status_code=400, detail="invalid day")
 
@@ -56,7 +54,6 @@ def validate_date_range(year: int, month: int, day: int, since: Dict, upto: Dict
 
 
 def validate_same_year(year, year_since, year_upto):
-    print(year, year_since, year_upto)
     if year_since != year or year_upto != year:
         raise HTTPException(
             status_code=400,
