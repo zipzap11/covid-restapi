@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from fastapi import APIRouter
 from ..dependencies import DATA
 from ..model.date import DayResponse
@@ -68,6 +68,37 @@ def daily_controller(since: str = default_since, upto: str = default_upto):
         year, month, day = separate_date(date, "-")
 
         if not validate_date(year, month, day, since_dict, upto_dict):
+            continue
+
+        daily_data = new_day_resp(val)
+        resp_list.append(daily_data)
+
+    return resp_list
+
+
+@router.get("/daily/{year}")
+def daily_year_controller(
+    year: int, since: Optional[str] = None, upto: Optional[str] = None
+):
+    if not since:
+        since = str(year) + ".01.01"
+    if not upto:
+        upto = str(year) + ".12.31"
+
+    month_since, day_since = separate_date(since, ".")[1:]
+    month_upto, day_upto = separate_date(upto, ".")[1:]
+
+    since_dict = {"year": year, "month": month_since, "day": day_since}
+    upto_dict = {"year": year, "month": month_upto, "day": day_upto}
+
+    data = DATA["update"]["harian"]
+    resp_list = []
+
+    for val in data:
+        date = val["key_as_string"][:10]
+        year, month, date = separate_date(date, "-")
+
+        if not validate_date(year, month, date, since_dict, upto_dict):
             continue
 
         daily_data = new_day_resp(val)
