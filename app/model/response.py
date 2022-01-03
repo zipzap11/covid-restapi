@@ -1,5 +1,5 @@
-class Response:
-    def __init__(self, ok: bool, data, message: str):
-        self.ok = ok
+class SuccessResponse:
+    def __init__(self, data):
+        self.ok = True
         self.data = data
-        self.message = message
+        self.message = "success"

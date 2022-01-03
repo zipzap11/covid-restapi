@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+
+from app.model.response import SuccessResponse
 from ..dependencies import DATA
 from ..model.general import GeneralResponse
 
@@ -6,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def generalController():
+async def general_controller():
     daily_data = DATA["update"]["harian"]
 
     resp_obj = GeneralResponse(0, 0, 0, 0, 0, 0, 0, 0)
@@ -20,4 +22,4 @@ async def generalController():
         resp_obj.new_positive += data["jumlah_positif_kum"]["value"]
         resp_obj.new_active += data["jumlah_dirawat_kum"]["value"]
 
-    return resp_obj
+    return SuccessResponse(resp_obj)

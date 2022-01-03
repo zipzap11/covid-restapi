@@ -53,7 +53,7 @@ async def daily_controller(since: str = default_since, upto: str = default_upto)
 
     validate_empty_list(resp_list)
 
-    return resp_list
+    return SuccessResponse(resp_list)
 
 
 @router.get("/daily/{year}")
@@ -95,7 +95,7 @@ async def daily_year_controller(
 
     validate_empty_list(resp_list)
 
-    return resp_list
+    return SuccessResponse(resp_list)
 
 
 @router.get("/daily/{year}/{month}")
@@ -139,7 +139,7 @@ async def daily_year_month_controller(
 
     validate_empty_list(resp_list)
 
-    return resp_list
+    return SuccessResponse(resp_list)
 
 
 @router.get("/daily/{year}/{month}/{day}")
