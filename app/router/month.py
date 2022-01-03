@@ -15,6 +15,18 @@ key = DATA["update"]["harian"][-1]["key_as_string"]
 default_upto = key[:4] + "." + key[5:7]
 
 
+# get moth code (year*moth), separate year and month, and return it as int
+def split_moth_code(moth, separator):
+    tmp = moth.split(separator)
+    year = tmp[0]
+    month = 0
+    if tmp[1][0] == "0":
+        month = tmp[1][1]
+    else:
+        month = tmp[1]
+    return [int(year), int(month)]
+
+
 @router.get("/monthly")
 def monthly_controller(since: str = default_since, upto: str = default_upto):
     data = DATA["update"]["harian"]
@@ -73,7 +85,7 @@ def monthly_year_controller(
         if data_month < month_since or data_month > month_upto:
             continue
 
-        if data_month not in monthly_data.values():
+        if data_month not in monthly_data.keys():
             monthly_data[data_month] = MonthResponse(moth, 0, 0, 0, 0)
 
         monthly_data[data_month].positive += val["jumlah_positif"]["value"]
@@ -84,12 +96,22 @@ def monthly_year_controller(
     return from_dictval_to_list(monthly_data)
 
 
-def split_moth_code(moth, separator):
-    tmp = moth.split(separator)
-    year = tmp[0]
-    month = 0
-    if tmp[1][0] == "0":
-        month = tmp[1][1]
-    else:
-        month = tmp[1]
-    return [int(year), int(month)]
+@router.get("/monthly/{year}/{month}")
+def montly_year_month_controller(year: str, month: str):
+    data = DATA["update"]["harian"]
+
+    moth_resp = str(year) + "-" + str(month)
+    resp_obj = MonthResponse(moth_resp, 0, 0, 0, 0)
+
+    for val in data:
+        moth = val["key_as_string"][:7]
+
+        if moth != moth_resp:
+            continue
+
+        resp_obj.positive += val["jumlah_positif"]["value"]
+        resp_obj.deaths += val["jumlah_meninggal"]["value"]
+        resp_obj.recovered += val["jumlah_sembuh"]["value"]
+        resp_obj.active += val["jumlah_dirawat"]["value"]
+
+    return resp_obj
