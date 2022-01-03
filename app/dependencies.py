@@ -8,7 +8,7 @@ def fetch_data():
     if not resp.ok:
         raise "error"
     data = resp.json()
-    return data
+    return data["update"]["harian"]
 
 
 DATA = fetch_data()
