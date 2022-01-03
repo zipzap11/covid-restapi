@@ -9,11 +9,12 @@ Rest api for covid data update, sourced from [Indonesian Government](https://doc
 - [pytest](https://docs.pytest.org/en/6.2.x/)
 
 ## Run
-After cloning this repo, you need to install the dependencies needed. Python 3.6 or above is neede or you can just pull the docker image in this [repository-link](https://hub.docker.com/repository/docker/zipzap11/covid-api), and just simply run this command
+After cloning this repo, you need to install the dependencies needed. Python 3.6 or above is needed or you can just pull the docker image in this [repository-link](https://hub.docker.com/repository/docker/zipzap11/covid-api), or simply run this command
 ```
-docker push zipzap11/covid-api:1.0
+docker pull zipzap11/covid-api:1.0
 ```
 
+If you want to run without container, just install dependencies below. 
 #### Install FastAPI
 run this command
 ```
