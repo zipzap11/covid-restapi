@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 from fastapi import APIRouter
+from fastapi.exceptions import HTTPException
 from ..dependencies import DATA
 from ..model.date import DayResponse
 
@@ -136,3 +137,25 @@ async def daily_year_month_controller(
         resp_list.append(daily_data)
 
     return resp_list
+
+
+@router.get("/daily/{year}/{month}/{day}")
+def daily_year_month_day_controller(year: str, month: str, day: str):
+    data = DATA["update"]["harian"]
+
+    # handling zero as the first number
+    if day[0] == "0":
+        day = day[1]
+    if month[0] == "0":
+        month = month[1]
+
+    for val in data:
+        date = val["key_as_string"][:10]
+        year_date, month_date, day_date = separate_date(date, "-")
+
+        if year_date != int(year) or month_date != int(month) or day_date != int(day):
+            continue
+
+        return new_day_resp(val)
+
+    raise HTTPException(status_code=404, detail="not found")
