@@ -6,14 +6,15 @@ from ..model.date import DayResponse
 router = APIRouter()
 
 # get first date
-default_since = key = DATA["update"]["harian"][0]["key_as_string"][:10]
+key = DATA["update"]["harian"][0]["key_as_string"]
+default_since = key[:4] + "." + key[5:7] + "." + key[8:10]
 # get last date
-default_upto = key = DATA["update"]["harian"][-1]["key_as_string"][:10]
+key = DATA["update"]["harian"][-1]["key_as_string"]
+default_upto = key[:4] + "." + key[5:7] + "." + key[8:10]
 
 
 def separate_date(date: str, separator: str):
     arr_date = date.split(separator)
-
     year = arr_date[0]
     month = arr_date[1]
     day = arr_date[2]
@@ -39,8 +40,8 @@ def new_day_resp(source: Dict):
 @router.get("/daily")
 def daily_controller(since: str = default_since, upto: str = default_upto):
 
-    year_since, month_since, day_since = separate_date(since, "-")
-    year_upto, month_upto, day_upto = separate_date(upto, "-")
+    year_since, month_since, day_since = separate_date(since, ".")
+    year_upto, month_upto, day_upto = separate_date(upto, ".")
 
     resp_list = []
     data = DATA["update"]["harian"]
@@ -56,11 +57,10 @@ def daily_controller(since: str = default_since, upto: str = default_upto):
             year == year_upto and month > month_upto
         ):
             continue
-        if year == year_since and month == month_since:
-            if day < day_since:
-                continue
-            if day > day_upto:
-                continue
+        if year == year_since and month == month_since and day < day_since:
+            continue
+        if year == year_upto and month == month_upto and day > day_upto:
+            continue
 
         daily_data = new_day_resp(val)
         resp_list.append(daily_data)
